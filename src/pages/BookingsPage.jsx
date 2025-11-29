@@ -7,7 +7,17 @@ export default function BookingsPage() {
   const [spas, setSpas] = useState([]);
   const [filter, setFilter] = useState("ALL");
 
-  const ownerId = 6;
+ const OWNER = sessionStorage.getItem("user");
+
+const currentUser = OWNER ? JSON.parse(OWNER) : null
+
+const ownerId = currentUser?.id || null;
+if(currentUser==null)
+{
+  
+  console.log("NO OWNER EXISTS");
+}
+
 
   useEffect(() => {
     Promise.all([
