@@ -30,7 +30,8 @@ router.post("/", (req, res) => {
     price: req.body.price,
     description:req.body.description,
     duration:req.body.duration,
-    slots: req.body.slot,
+    slots: Array.isArray(req.body.slots) ? req.body.slots : [req.body.slots],
+
     status: "PENDING",
     image: req.body.image || "",
     available: req.body.available ?? true

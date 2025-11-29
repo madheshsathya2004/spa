@@ -1,11 +1,12 @@
 import React from "react";
 
+
 export default function ServiceCard({ service, onToggle, onEdit, onDelete }) {
   if (!service) return null;
 
   return (
     <div
-      className="card spa-card interactive"
+      className="card spa-card-client interactive"
       style={{
         width: "270px",
         margin: "5px",
@@ -21,7 +22,7 @@ export default function ServiceCard({ service, onToggle, onEdit, onDelete }) {
           <img
             src={service.image}
             alt="service"
-            className="spa-card-image"
+            className="spa-card-client-image"
             style={{
               width: "100%",
               height: "120px",
@@ -47,7 +48,7 @@ export default function ServiceCard({ service, onToggle, onEdit, onDelete }) {
       </div>
 
       {/* Body */}
-      <div className="spa-card-body" style={{ padding: "16px" }}>
+      <div className="spa-card-client-body" style={{ padding: "16px" }}>
         <div className="spa-row" style={{ fontSize: "14px", display: "flex", justifyContent: "space-between" }}>
           <h6 className="spa-name m-0">{service.name}</h6>
           <span className={`spa-status ${service.status?.toLowerCase()}`} style={{ fontSize: "11px" }}>
@@ -55,12 +56,35 @@ export default function ServiceCard({ service, onToggle, onEdit, onDelete }) {
           </span>
         </div>
 
-        <p className="fw-bold mb-1" style={{ fontSize: "13px" }}>₹ {service.price}</p>
+        <p className="fw-bold mb-1" style={{ fontSize: "13px" }}>Price : ₹ {service.price}</p>
         <p className="fw-bold mb-1" style={{ fontSize: "13px" }}>{service.description}</p>
         <p className="fw-bold mb-1" style={{ fontSize: "13px" }}>Duration : {service.duration} mins</p>
-        <p className="small mb-1" style={{ fontSize: "12px" }}>
-          Slots: {service.slots||"No slots"}
-        </p>
+{/* Slots */}
+<div style={{ marginTop: "6px" }}>
+  <span className="fw-bold" style={{ fontSize: "12px" }}>Slots:</span>
+  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+    {service.slots && service.slots.length > 0 ? (
+      service.slots.map((slot, index) => (
+        <span
+          key={index}
+          style={{
+            background: "#8b5cf6",
+            color: "white",
+            padding: "3px 8px",
+            borderRadius: "8px",
+            fontSize: "11px",
+            fontWeight: "500",
+          }}
+        >
+          {slot}
+        </span>
+      ))
+    ) : (
+      <span style={{ fontSize: "11px", color: "#999" }}>No Slots</span>
+    )}
+  </div>
+</div>
+
 
         <div className="spa-meta-row" style={{ fontSize: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           

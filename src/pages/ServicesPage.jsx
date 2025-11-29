@@ -62,17 +62,21 @@ export default function ServicesPage() {
 
       <label className="fw-semibold">Select Spa</label>
       <select
-        className="form-select mb-3"
-        value={spaId}
-        onChange={(e) => setSpaId(e.target.value)}
-      >
-        {spas.map((spa) => (
-          <option key={spa.id} value={spa.id}>
-            {spa.name}
-          </option>
-        ))}
-      </select>
-
+  className="form-select mb-3 spa-select"
+  value={spaId}
+  onChange={(e) => setSpaId(e.target.value)}
+  disabled={spas.length === 0}
+>
+  {spas.length === 0 ? (
+    <option>No Spas Available</option>
+  ) : (
+    spas.map((spa) => (
+      <option key={spa.id} value={spa.id}>
+        {spa.name}
+      </option>
+    ))
+  )}
+</select>
       <button className="btn btn-success mb-3" onClick={() => setShowAdd(true)}>
         + Add Service
       </button>

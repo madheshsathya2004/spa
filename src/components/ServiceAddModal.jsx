@@ -7,7 +7,7 @@ export default function ServiceAddModal({ spaId, reload, onClose }) {
     price: "",
     duration: "",
     description: "",
-    slot: "",
+    slots: [],
     image: "",
     status: "PENDING",
     available: true,
@@ -30,26 +30,26 @@ export default function ServiceAddModal({ spaId, reload, onClose }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) return alert("Please enter service name");
-    if (!form.price || isNaN(Number(form.price))) return alert("Please enter valid price");
-    if (!form.duration.trim()) return alert("Please enter duration");
-    if (!form.description.trim()) return alert("Please enter description");
-    if (!form.slot) return alert("Please select a slot");
+  e.preventDefault();
+  if (!form.name.trim()) return alert("Please enter service name");
+  if (!form.price || isNaN(Number(form.price))) return alert("Please enter valid price");
+  if (!form.duration.trim()) return alert("Please enter duration");
+  if (!form.description.trim()) return alert("Please enter description");
+  if (!form.slots.length) return alert("Please select at least 1 slot");
 
-    try {
-      setSaving(true);
-      const payload = { ...form, spaId };
-      await API.post("/services", payload);
-      reload();
-      onClose();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to add service");
-    } finally {
-      setSaving(false);
-    }
-  };
+  try {
+    setSaving(true);
+    const payload = { ...form, spaId };
+    await API.post("/services", payload);
+    reload();
+    onClose();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add service");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const slots = ["10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM"];
 
@@ -121,23 +121,33 @@ export default function ServiceAddModal({ spaId, reload, onClose }) {
 
             {/* Slots as radio buttons */}
             <div>
-              <label className="form-label fw-bold">Select Slot</label>
-              <div className="d-flex gap-3 flex-wrap">
-                {slots.map((s) => (
-                  <div className="form-check" key={s}>
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="slot"
-                      value={s}
-                      checked={form.slot === s}
-                      onChange={(e) => setForm({ ...form, slot: e.target.value })}
-                    />
-                    <label className="form-check-label">{s}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
+  <label className="form-label fw-bold">Select Slots</label>
+  <div className="d-flex gap-3 flex-wrap">
+    {slots.map((s) => (
+      <div className="form-check" key={s}>
+        <input
+          className="form-check-input"
+          type="checkbox"
+          value={s}
+          checked={form.slots?.includes(s)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setForm((prev) => {
+              let updatedSlots;
+              if (prev.slots?.includes(value)) {
+                updatedSlots = prev.slots.filter((x) => x !== value);
+              } else {
+                updatedSlots = [...(prev.slots || []), value];
+              }
+              return { ...prev, slots: updatedSlots };
+            });
+          }}
+        />
+        <label className="form-check-label">{s}</label>
+      </div>
+    ))}
+  </div>
+</div>
 
             {/* Available */}
             <div className="form-check form-switch">

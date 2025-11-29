@@ -52,11 +52,12 @@ const LoginPage = () => {
         sessionStorage.setItem('token', data.token);
         sessionStorage.setItem('user', JSON.stringify(data.user));
         showToast('Login Success', 'success');
+        window.dispatchEvent(new Event('storage'));
         setTimeout(() => {
           const role = data.user.role;
           if(role === 'customer') {
-            window.dispatchEvent(new Event('storage'));
-            navigate('/customer')
+            
+            navigate('/')
           }
           else if (role === 'spa_owner') {
             navigate('/ownerdashboard')

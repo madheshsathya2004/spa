@@ -9,7 +9,7 @@ export default function ServiceEditModal({ service, reload, onClose }) {
     price: service?.price || "",
     duration: service?.duration || "",
     description: service?.description || "",
-    slot: service?.slots || "",
+    slots: service?.slots || [],  // array now
     image: service?.image || "",
     status: service?.status || "PENDING",
     available: service?.available ?? true,
@@ -26,7 +26,7 @@ export default function ServiceEditModal({ service, reload, onClose }) {
       price: service?.price || "",
       duration: service?.duration || "",
       description: service?.description || "",
-      slot: service?.slots || "",
+      slots: service?.slots || [],         // updated
       image: service?.image || "",
       status: service?.status || "PENDING",
       available: service?.available ?? true,
@@ -53,7 +53,7 @@ export default function ServiceEditModal({ service, reload, onClose }) {
     if (!form.price || isNaN(Number(form.price))) return alert("Please enter valid price");
     if (!form.duration.trim()) return alert("Please enter duration");
     if (!form.description.trim()) return alert("Please enter description");
-    if (!form.slot) return alert("Please select a slot");
+    if (!form.slots.length) return alert("Please select at least 1 slot");
 
     try {
       setSaving(true);
@@ -81,75 +81,61 @@ export default function ServiceEditModal({ service, reload, onClose }) {
           </div>
 
           <form onSubmit={handleSubmit} className="d-flex flex-column gap-3 mt-2">
+
             {/* Image */}
             <div>
               <label className="form-label fw-bold">Service Image</label>
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
+              <input type="file" className="form-control" accept="image/*" onChange={handleImageChange} />
               {preview && <img src={preview} className="img-fluid rounded mt-2" alt="preview" />}
             </div>
 
             {/* Name */}
             <div>
               <label className="form-label fw-bold">Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
+              <input type="text" className="form-control" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}/>
             </div>
 
             {/* Price */}
             <div>
               <label className="form-label fw-bold">Price</label>
-              <input
-                type="number"
-                className="form-control"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-              />
+              <input type="number" className="form-control" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}/>
             </div>
 
             {/* Duration */}
             <div>
               <label className="form-label fw-bold">Duration</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="e.g., 30 mins"
-                value={form.duration}
-                onChange={(e) => setForm({ ...form, duration: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="e.g., 30 mins" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })}/>
             </div>
 
             {/* Description */}
             <div>
               <label className="form-label fw-bold">Description</label>
-              <textarea
-                className="form-control"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
+              <textarea className="form-control" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}/>
             </div>
 
-            {/* Slot selection as radio buttons */}
+            {/* Slot checkboxes */}
             <div>
-              <label className="form-label fw-bold">Select Slot</label>
+              <label className="form-label fw-bold">Select Slots</label>
               <div className="d-flex gap-3 flex-wrap">
                 {slots.map((s) => (
                   <div className="form-check" key={s}>
                     <input
                       className="form-check-input"
-                      type="radio"
-                      name="slot"
+                      type="checkbox"
                       value={s}
-                      checked={form.slot === s}
-                      onChange={(e) => setForm({ ...form, slot: e.target.value })}
+                      checked={form.slots.includes(s)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setForm((prev) => {
+                          let updatedSlots;
+                          if (prev.slots.includes(value)) {
+                            updatedSlots = prev.slots.filter((x) => x !== value);
+                          } else {
+                            updatedSlots = [...prev.slots, value];
+                          }
+                          return { ...prev, slots: updatedSlots };
+                        });
+                      }}
                     />
                     <label className="form-check-label">{s}</label>
                   </div>
@@ -157,7 +143,7 @@ export default function ServiceEditModal({ service, reload, onClose }) {
               </div>
             </div>
 
-            {/* Available */}
+            {/* Availability toggle */}
             <div className="form-check form-switch">
               <input
                 className="form-check-input"
@@ -169,18 +155,14 @@ export default function ServiceEditModal({ service, reload, onClose }) {
             </div>
 
             <div className="modal-footer mt-3 justify-content-end gap-2">
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={onClose}
-                disabled={saving}
-              >
+              <button type="button" className="btn btn-outline-secondary" onClick={onClose} disabled={saving}>
                 Cancel
               </button>
               <button type="submit" className="btn btn-success" disabled={saving}>
                 {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
+
           </form>
         </div>
       </div>

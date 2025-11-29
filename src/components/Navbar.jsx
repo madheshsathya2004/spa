@@ -23,7 +23,7 @@ export default function Navbar({ user, onLogout }) {
             <li className="nav-item"><Link className="nav-link" to="/spa">My Spa</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/services">Services</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/bookings">Bookings</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/profile">Profile</Link></li>
+            <li className="nav-item"><Link className="nav-link" to="/owner/profile">Profile</Link></li>
           </ul>
 
           <div className="d-flex align-items-center">

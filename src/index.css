@@ -171,6 +171,18 @@ h1, h2, h3, h4, h5, h6,
   flex-direction:column;
   height: 100%;
 }
+.spa-card-client {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(10,14,24,0.08));
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(241, 235, 235, 0.04);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  box-shadow: 0 6px 16px rgba(2,6,23,0.45);
+  cursor: pointer;
+  display:flex;
+  flex-direction:column;
+  height: 100%;
+}
 
 /* hover effect (lift + subtle glow) */
 .spa-card.interactive:hover {
@@ -178,11 +190,18 @@ h1, h2, h3, h4, h5, h6,
   box-shadow: 0 14px 28px rgba(37,99,235,0.12);
   border-color: rgba(37,99,235,0.25);
 }
+.spa-card-client.interactive:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(37,99,235,0.12);
+  border-color: rgba(37,99,235,0.25);
+}
+
 
 /* top image */
 .spa-top { position: relative; height: 140px; overflow:hidden; }
 .spa-card-image { width:100%; height:100%; object-fit:cover; display:block; filter: contrast(1.02) saturate(1.05); }
 
+.spa-card-client-image { width:100%; height:100%; object-fit:cover; display:block; filter: contrast(1.02) saturate(1.05); }
 /* availability pill (switch placed at top-right) */
 .availability-pill {
   position: absolute;
@@ -317,6 +336,12 @@ h1, h2, h3, h4, h5, h6,
  
 }
 
+.spa-card-client:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 20px 42px rgba(2, 174, 247, 0.25);
+  border: 1px solid rgba(226, 233, 236, 0.35);
+ 
+}
 /* Container Border */
 .spa-page {
   border: 2px solid rgb(28, 61, 133);
@@ -325,6 +350,10 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .spa-card
+{
+  border:2px solid white;
+}
+.spa-card-client
 {
   border:2px solid white;
 }
@@ -438,4 +467,31 @@ img.img-fluid {
   color:black;
 }
 
+.no-services-text {
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 1.3rem;     /* bigger font */
+  text-align: center;    /* center the text */
+  width: 100%;           /* ensure proper centering */
+  padding: 15px 0;       /* spacing */
+  opacity: 0.95;
+}
 
+
+
+.spa-select {
+  background-color: rgba(255,255,255,0.08) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+}
+
+.spa-select option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+.container .text-muted {
+  color: #d1d1d1 !important;
+  text-align:center;
+  font-weight: 800;
+  font-size: large;
+}

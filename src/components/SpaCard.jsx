@@ -12,9 +12,9 @@ export default function SpaCard({ spa, onEdit, onDelete, onToggleAvailability })
   const imgSrc = (spa.images && spa.images[0]) || "/mnt/data/17639612578352311144581381219381.jpg";
 
   return (
-    <div className="card spa-card interactive" title={spa.name}>
+    <div className="card spa-card-client interactive" title={spa.name}>
       <div className="spa-top">
-        <img src={imgSrc} alt={spa.name || "spa"} className="spa-card-image" />
+        <img src={imgSrc} alt={spa.name || "spa"} className="spa-card-client-image" />
         <div className={`availability-pill ${spa.available ? "on" : "off"}`}>
           <div
             className={`switch ${spa.available ? "on" : ""}`}
@@ -30,7 +30,7 @@ export default function SpaCard({ spa, onEdit, onDelete, onToggleAvailability })
         </div>
       </div>
 
-      <div className="spa-card-body">
+      <div className="spa-card-client-body">
         <div className="spa-row">
           <h5 className="spa-name">{spa.name}</h5>
           <span className={`spa-status ${spa.status?.toLowerCase()}`}>{spa.status || "PENDING"}</span>
