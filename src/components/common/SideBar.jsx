@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, Users, Store, LogOut, X, Clock, TrendingUp, Package, CheckCircle } from 'lucide-react';
+import "../styles/admin.css"
 
 const Sidebar = ({ currentPage, setCurrentPage, sidebarOpen, setSidebarOpen, pendingRequests = 0, pendingServiceRequests = 0 }) => {
   const menuItems = [

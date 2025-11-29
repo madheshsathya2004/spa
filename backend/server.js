@@ -12,6 +12,7 @@ const profileRoute = require("./routes/profileRoute");
 const bookingsRoutes = require("./routes/bookingRoutes");
 const authRoutes = require('./routes/auth.routes');
 const spaRoutesCustomer = require('./routes/spaRoutesCustomer');
+const apiRouter = require('./routes/api');
 const { timeStamp } = require('console');
 
 const app = express(); 
@@ -25,6 +26,8 @@ app.use("/spas", spaRoutes);
 app.use("/services", serviceRoutes);
 app.use("/profile", profileRoute);
 app.use("/bookings",bookingsRoutes);
+app.use('/api', apiRouter);
+
 
 const DB_FILE = path.join(__dirname, "data", "db.json");
 const initDatabase = async () => {
@@ -96,6 +99,8 @@ app.use((err, req, res, next) =>{
     message : 'Internal Server Error'
   });
 });
+
+// mount API router
 
 // Start server
 const startServer = async () => {

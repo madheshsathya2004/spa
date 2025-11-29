@@ -1,8 +1,9 @@
 // frontend/src/components/admin/SpaRequests.jsx
 import React, { useEffect, useState } from 'react';
 import { X, Eye } from 'lucide-react';
-import api from '../../api';
-import { useToast } from '../../contexts/ToastContext';
+import api from '../../admin_api';
+import { useToast } from '../contexts/ToastContext';
+import "../../styles/admin.css";
 
 const SpaRequests = () => {
   const [spaRequests, setSpaRequests] = useState([]);

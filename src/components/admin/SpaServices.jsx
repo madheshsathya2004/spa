@@ -1,6 +1,7 @@
 // src/components/admin/ApprovedServices.jsx
 import React, { useState } from 'react';
 import { Clock, DollarSign, X, Calendar } from 'lucide-react';
+import "../../styles/admin.css";
 
 const SpaServices = ({ approvedServices }) => {
   const [selectedService, setSelectedService] = useState(null);

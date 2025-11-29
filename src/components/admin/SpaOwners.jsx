@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Mail, Phone, X } from 'lucide-react';
-import api from '../../api';
-import { useToast } from '../../contexts/ToastContext';
+import api from '../../admin_api';
+import { useToast } from '../contexts/ToastContext';
+import "../../styles/admin.css";
 
 const SpaOwners = () => {
   const [owners, setOwners] = useState([]);

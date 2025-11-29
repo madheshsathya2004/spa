@@ -1,8 +1,9 @@
 // frontend/src/components/admin/ServiceRequests.jsx
 import React, { useEffect, useState } from 'react';
 import { X, Eye, Clock, DollarSign, IndianRupee } from 'lucide-react';
-import api from '../../api';
-import { useToast } from '../../contexts/ToastContext';
+import api from '../../admin_api';
+import { useToast } from '../contexts/ToastContext';
+import "../../styles/admin.css";
 
 const eqId = (a, b) => String(a) === String(b);
 

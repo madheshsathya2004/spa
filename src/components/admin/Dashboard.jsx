@@ -1,8 +1,10 @@
 // src/components/admin/Dashboard.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { Clock, Store, Users, Calendar } from 'lucide-react';
-import api from '../../api';
-import { useToast } from '../../contexts/ToastContext';
+import api from '../../admin_api';
+import { useToast } from '../contexts/ToastContext';
+import "../../styles/admin.css";
+
 
 const Dashboard = ({ setCurrentPage }) => {
   const toast = useToast();

@@ -1,7 +1,7 @@
 // src/components/admin/Customers.jsx
 import React, { useEffect, useState } from 'react';
-import api from '../../api';
-
+import api from '../../admin_api';
+import "../../styles/admin.css";
 // Convert ISO → DD-MM-YYYY
 const formatDate = (dateString) => {
   if (!dateString) return '-';

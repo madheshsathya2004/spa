@@ -1,8 +1,9 @@
 // src/components/admin/Bookings.jsx
 import React, { useEffect, useState } from 'react';
 import { Clock, Calendar } from 'lucide-react';
-import api from '../../api';
-import { useToast } from '../../contexts/ToastContext';
+import api from '../../admin_api';
+import { useToast } from '../contexts/ToastContext';
+import "../../styles/admin.css";
 
 const thStyle = {
   textAlign: 'left',

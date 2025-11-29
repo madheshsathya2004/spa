@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menu, Home } from 'lucide-react';
+import "../styles/admin.css"
 
 const Header = ({ pendingRequests = 0, onMenuToggle, setCurrentPage }) => {
   return (
