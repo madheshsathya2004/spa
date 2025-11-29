@@ -6,16 +6,8 @@ export default function BookingsPage() {
   const [users, setUsers] = useState([]);
   const [spas, setSpas] = useState([]);
   const [filter, setFilter] = useState("ALL");
-const OWNER = sessionStorage.getItem("user");
 
-const currentUser = OWNER ? JSON.parse(OWNER) : null
-
-const ownerId = currentUser?.id || null;
-if(currentUser==null)
-{
-  
-  console.log("NO OWNER EXISTS");
-}
+  const ownerId = 6;
 
   useEffect(() => {
     Promise.all([
@@ -66,19 +58,20 @@ if(currentUser==null)
   const shownBookings =
     filter === "ALL"
       ? bookings
-      : bookings.filter((b) => b.status === filter);
+      : bookings.filter((b) => b.status === filter.toLowerCase());
 
   return (
-    <>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Bookings</h4>
+    <div className="container mt-4">
+      {/* Header + Filters */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h3 className="fw-bold">Bookings</h3>
 
         <div className="btn-group">
           {["ALL", "PENDING", "APPROVED", "COMPLETED", "DECLINED"].map((f) => (
             <button
               key={f}
               className={`btn btn-sm ${
-                filter === f ? "btn-accent" : "btn-outline-light"
+                filter === f ? "btn-primary" : "btn-outline-primary"
               }`}
               onClick={() => setFilter(f)}
             >
@@ -88,11 +81,21 @@ if(currentUser==null)
         </div>
       </div>
 
-      <div className="d-grid gap-3">
-        {shownBookings.map((b) => (
-          <BookingCard key={b.id} booking={b} onAction={updateStatus} />
-        ))}
+      {/* Cards Grid */}
+      <div className="row g-4">
+        {shownBookings.length === 0 ? (
+          <div className="text-center text-muted fs-4 mt-5">
+            No bookings found
+          </div>
+        ) : (
+          shownBookings.map((b) => (
+            <div className="col-md-3" key={b.id}>
+              <BookingCard booking={b} onAction={updateStatus} />
+            </div>
+          ))
+        )}
       </div>
-    </>
+    </div>
   );
 }
+
