@@ -14,6 +14,7 @@ const authRoutes = require('./routes/auth.routes');
 const spaRoutesCustomer = require('./routes/spaRoutesCustomer');
 const apiRouter = require('./routes/api');
 const { timeStamp } = require('console');
+const paymentRoutes = require('./routes/payments.routes');
 
 const app = express(); 
 app.use(cors());
@@ -27,9 +28,17 @@ app.use("/services", serviceRoutes);
 app.use("/profile", profileRoute);
 app.use("/bookings",bookingsRoutes);
 app.use('/api', apiRouter);
+app.use('/api/payment', paymentRoutes);
 
 
 const DB_FILE = path.join(__dirname, "data", "db.json");
+
+
+// Import payment routes
+
+
+// Use routes
+
 const initDatabase = async () => {
   try {
     await fs.access(DB_FILE);
@@ -41,9 +50,15 @@ const initDatabase = async () => {
 
 // Read database gloabally
 app.locals.readDB = async () => {
-  const data = await fs.readFile(DB_FILE, 'utf8');
-  return JSON.parse(data);
+  try {
+    const data = await fs.readFile(DB_FILE, 'utf8');
+    return JSON.parse(data || '{}');
+  } catch (error) {
+    console.error("Error reading DB:", error);
+    return { users: [], spas: [], services: [], bookings: [] };
+  }
 };
+
 
 // Write database globally
 app.locals.writeDB = async (data) => {

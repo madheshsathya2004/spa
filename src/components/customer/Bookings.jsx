@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './Bookings.css';
 
 const API_BASE_URL = 'http://localhost:5000/api/customer';
+const REFUND_API_URL = 'http://localhost:5000/api/payment/refund';
 
 const Bookings = () => {
   const { bookingId } = useParams();
@@ -153,19 +154,116 @@ const Bookings = () => {
     }
   };
 
+  const processRefundPayment = async (amount, customerUpiId, merchantUpiId, orderId, description) => {
+    try {
+      const response = await fetch(REFUND_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amount,
+          customer: {
+            identifier: customerUpiId,
+            name: parsedUser?.fullName || "Customer"
+          },
+          merchant: {
+            identifier: merchantUpiId,
+            pin: "5678" // Note: In production, this should be handled securely on backend
+          },
+          orderId: orderId,
+          description: description
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.status !== 'success') {
+        throw new Error(result.message || 'Refund payment failed');
+      }
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel and refund this booking?')) return;
+    
     try {
+      // Get the booking details
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) throw new Error('Booking not found');
+
+      // Check if UPI IDs are stored
+      if (!booking.customerUpiId || !booking.merchantUpiId) {
+        alert('Cannot process refund: Payment UPI details not found in booking');
+        return;
+      }
+
+      const priceDetails = calculatePrice(booking);
+      const baseAmount = priceDetails.finalPrice; // Use the amount that was actually paid
+      
+      // Calculate refund based on membership status
+      const isMember = hasActiveMembership();
+      const deductionRate = isMember ? 0 : 0.1; // 10% deduction for non-members
+      const deductedAmount = baseAmount * deductionRate;
+      const finalRefundAmount = baseAmount - deductedAmount;
+
+      let refundResult = null;
+
+      // Process refund through external API using stored UPI IDs
+      if (booking.paymentMethod === 'upi') {
+        const orderId = `REFUND-${bookingId}`;
+        const description = `Refund for booking ${bookingId} - ${booking.spaName}`;
+
+        try {
+          refundResult = await processRefundPayment(
+            finalRefundAmount,
+            booking.customerUpiId,  // Use stored customer UPI ID
+            booking.merchantUpiId,  // Use stored merchant UPI ID
+            orderId,
+            description
+          );
+          console.log('Refund processed:', refundResult);
+        } catch (refundError) {
+          console.error('External refund failed:', refundError);
+          alert(`Failed to process refund payment: ${refundError.message}`);
+          return;
+        }
+      }
+
+      // Update booking status to cancelled in backend
       const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refundAmount: finalRefundAmount,
+          deductedAmount: deductedAmount,
+          membershipStatusAtCancel: isMember ? 'active' : 'inactive',
+          refundTransactionId: refundResult?.transactionId || null,
+          refundDetails: refundResult || null
+        })
       });
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || 'Refund failed');
       }
+
       const result = await response.json();
-      alert('✅ Refund Successful! ' + (result.refund ? `Refund: $${result.refund.refundAmount}` : ''));
+      
+      let message = '✅ Refund Successful!\n';
+      message += `Refund Amount: ₹${finalRefundAmount.toFixed(2)}\n`;
+      if (deductedAmount > 0) {
+        message += `Deduction (Non-Member): ₹${deductedAmount.toFixed(2)}\n`;
+      }
+      if (refundResult?.transactionId) {
+        message += `Transaction ID: ${refundResult.transactionId}\n`;
+      }
+      message += `Refunded from: ${booking.merchantUpiId}\n`;
+      message += `Refunded to: ${booking.customerUpiId}`;
+      
+      alert(message);
       fetchUserBookings();
     } catch (err) {
       console.error('Refund/cancellation failed:', err);
@@ -260,12 +358,12 @@ const Bookings = () => {
                 {booking.services.map((service, index) => (
                   <div key={index} className="service-row">
                     <span className="service-name">{service.name}</span>
-                    <span className="service-price">${service.price}</span>
+                    <span className="service-price">₹{service.price}</span>
                   </div>
                 ))}
                 <div className="service-row">
                   <span className="service-name">Subtotal</span>
-                  <span className="service-price">${priceDetails.basePrice.toFixed(2)}</span>
+                  <span className="service-price">₹{priceDetails.basePrice.toFixed(2)}</span>
                 </div>
                 {membershipLoading && booking.status !== 'completed' && booking.status !== 'cancelled' && (
                   <div className="service-row">
@@ -281,14 +379,14 @@ const Bookings = () => {
                       <strong>Membership Discount (30%)</strong>
                     </span>
                     <span className="service-price">
-                      <strong>-${priceDetails.discountAmount.toFixed(2)}</strong>
+                      <strong>-₹{priceDetails.discountAmount.toFixed(2)}</strong>
                     </span>
                   </div>
                 )}
                 <div className="service-row total-row">
                   <span className="service-name"><strong>Total Amount</strong></span>
                   <span className="service-price total-price">
-                    <strong>${priceDetails.finalPrice.toFixed(2)}</strong>
+                    <strong>₹{priceDetails.finalPrice.toFixed(2)}</strong>
                   </span>
                 </div>
               </div>
@@ -299,12 +397,24 @@ const Bookings = () => {
                 <h4>💰 Payment Information</h4>
                 <div className="info-row">
                   <span className="info-label">Payment Method:</span>
-                  <span className="info-value">{booking.paymentMethod}</span>
+                  <span className="info-value">{booking.paymentMethod?.toUpperCase()}</span>
                 </div>
                 <div className="info-row">
-                  <span className="info-label">Payment Reference:</span>
+                  <span className="info-label">Transaction ID:</span>
                   <span className="info-value">{booking.paymentReference}</span>
                 </div>
+                {booking.customerUpiId && (
+                  <div className="info-row">
+                    <span className="info-label">Customer UPI:</span>
+                    <span className="info-value">{booking.customerUpiId}</span>
+                  </div>
+                )}
+                {booking.merchantUpiId && (
+                  <div className="info-row">
+                    <span className="info-label">Merchant UPI:</span>
+                    <span className="info-value">{booking.merchantUpiId}</span>
+                  </div>
+                )}
                 {booking.paidAt && (
                   <div className="info-row">
                     <span className="info-label">Paid At:</span>
@@ -327,7 +437,7 @@ const Bookings = () => {
                 <h4>✅ Booking Approved!</h4>
                 <p>Great news! Your booking has been approved. You can now proceed with payment to confirm your appointment.</p>
                 {priceDetails.discountRate > 0 && (
-                  <p><strong>💎 Membership Benefit:</strong> You're saving ${priceDetails.discountAmount.toFixed(2)} (30% off) with your active membership!</p>
+                  <p><strong>💎 Membership Benefit:</strong> You're saving ₹{priceDetails.discountAmount.toFixed(2)} (30% off) with your active membership!</p>
                 )}
                 <p><strong>Note:</strong> Click "Pay Now" button below to complete payment.</p>
               </div>
@@ -338,7 +448,7 @@ const Bookings = () => {
                 <h4>🎉 Booking Confirmed!</h4>
                 <p>Payment completed successfully! Your appointment is confirmed. We look forward to seeing you.</p>
                 {priceDetails.discountAmount > 0 && (
-                  <p><strong>💎 You saved ${priceDetails.discountAmount.toFixed(2)} with your membership!</strong></p>
+                  <p><strong>💎 You saved ₹{priceDetails.discountAmount.toFixed(2)} with your membership!</strong></p>
                 )}
               </div>
             )}
@@ -347,9 +457,18 @@ const Bookings = () => {
               <div className="info-box" style={{ borderLeftColor: '#d9534f', background: 'rgba(220,53,69,0.08)' }}>
                 <h4 style={{ color: '#d9534f' }}>❌ Refunded & Cancelled</h4>
                 <p><strong>Refund Status:</strong> {booking.refund.refundStatus}</p>
-                <p><strong>Refund Amount:</strong> ${booking.refund.refundAmount}</p>
+                <p><strong>Refund Amount:</strong> ₹{booking.refund.refundAmount.toFixed(2)}</p>
                 {booking.refund.deductedAmount > 0 && (
-                  <p><strong>Deducted (Non-Member Fee):</strong> ${booking.refund.deductedAmount}</p>
+                  <p><strong>Deducted (Non-Member Fee):</strong> ₹{booking.refund.deductedAmount.toFixed(2)}</p>
+                )}
+                {booking.refund.refundTransactionId && (
+                  <p><strong>Refund Transaction ID:</strong> {booking.refund.refundTransactionId}</p>
+                )}
+                {booking.refund.customerUpiId && (
+                  <p><strong>Refunded To:</strong> {booking.refund.customerUpiId}</p>
+                )}
+                {booking.refund.merchantUpiId && (
+                  <p><strong>Refunded From:</strong> {booking.refund.merchantUpiId}</p>
                 )}
                 <p><strong>Refund Date:</strong> {new Date(booking.refund.refundDate).toLocaleString()}</p>
                 <p><strong>Membership at Cancellation:</strong> {booking.refund.membershipStatusAtCancel}</p>
@@ -372,7 +491,7 @@ const Bookings = () => {
                 }
               >
                 {booking.status === 'pending' && '🔒 Pay Now (Pending Approval)'}
-                {booking.status === 'approved' && `💳 Pay Now $${priceDetails.finalPrice.toFixed(2)}`}
+                {booking.status === 'approved' && `💳 Pay Now ₹${priceDetails.finalPrice.toFixed(2)}`}
                 {booking.status === 'completed' && '✓ Payment Completed'}
                 {booking.status === 'cancelled' && '❌ Cancelled'}
               </button>

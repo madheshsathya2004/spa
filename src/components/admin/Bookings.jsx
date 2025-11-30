@@ -102,38 +102,7 @@ const Bookings = () => {
         if (!mounted) return;
 
         setUsers(usersData);
-
-        // determine status by appointment date and persist if needed
-        const today = new Date();
-        const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-        // prepare local copy and track updates to persist
-        const prepared = await Promise.all(bookingsData.map(async (b) => {
-          const bDate = dateOnly(b.date);
-          let desiredStatus = b.status || '';
-
-          if (bDate) {
-            if (bDate < todayOnly) desiredStatus = 'completed';
-            else desiredStatus = 'upcoming';
-          }
-
-          // if status differs, patch server to persist change
-          if (String(desiredStatus).toLowerCase() !== String(b.status).toLowerCase()) {
-            try {
-              await api.patch(`/bookings/${b.id}/status`, { status: desiredStatus });
-              // update local object status after persisting
-              b.status = desiredStatus;
-            } catch (err) {
-              console.error('Failed to persist booking status for', b.id, err);
-              // don't block - keep local desired status for display
-              b.status = desiredStatus;
-            }
-          }
-
-          return b;
-        }));
-
-        if (mounted) setBookings(prepared);
+        setBookings(bookingsData);
       } catch (err) {
         console.error('Failed to load bookings or users', err);
         toast?.show?.('Failed to load bookings', { type: 'error' });
@@ -199,13 +168,13 @@ const Bookings = () => {
 
                   // color mapping
                   const borderColor = status === 'completed' ? 'rgba(16,185,129,0.2)' :
-                                      status === 'upcoming' ? 'rgba(59,130,246,0.2)' :
+                                      status === 'approved' ? 'rgba(59,130,246,0.2)' :
                                       'rgba(239,68,68,0.2)';
                   const bgColor = status === 'completed' ? 'rgba(16,185,129,0.08)' :
-                                  status === 'upcoming' ? 'rgba(59,130,246,0.06)' :
+                                  status === 'approved' ? 'rgba(59,130,246,0.06)' :
                                   'rgba(239,68,68,0.06)';
                   const textColor = status === 'completed' ? '#10b981' :
-                                    status === 'upcoming' ? '#3b82f6' :
+                                    status === 'approved' ? '#3b82f6' :
                                     '#ef4444';
 
                   return (

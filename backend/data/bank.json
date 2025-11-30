@@ -1,0 +1,392 @@
+{
+  "users": [
+    {
+      "id": "customer-1",
+      "phone": "9000090000",
+      "password": "Password@123",
+      "role": "customer",
+      "upiID": "9000090000@bank",
+      "upiEnabled": true,
+      "upiPin": "1234",
+      "status": "active",
+      "profile": {
+        "name": "Kalki",
+        "email": "kalki@example.com",
+        "joinedDate": "2025-11-25T10:21:36.271Z"
+      }
+    },
+    {
+      "id": "owner-1",
+      "phone": "9791273986",
+      "password": "Password@123",
+      "role": "owner",
+      "upiID": "9791273986@bank",
+      "upiEnabled": true,
+      "upiPin": "5678",
+      "status": "active",
+      "profile": {
+        "name": "Spa Owner",
+        "email": "spaowner@example.com",
+        "joinedDate": "2025-11-20T10:21:36.271Z"
+      }
+    },
+    {
+      "id": "customer-2",
+      "phone": "9876543210",
+      "password": "Password@123",
+      "role": "customer",
+      "upiID": "9876543210@bank",
+      "upiEnabled": true,
+      "upiPin": "9999",
+      "status": "active",
+      "profile": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "joinedDate": "2025-11-26T10:21:36.271Z"
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "accountId": "acc-customer-1",
+      "userId": "customer-1",
+      "balance": 265,
+      "type": "savings",
+      "status": "active",
+      "isPrimary": true,
+      "card": {
+        "number": "4111111111111111",
+        "cvv": "123",
+        "expiry": "2030-12-31",
+        "pin": "1234"
+      },
+      "createdAt": "2025-11-29T00:00:00.000Z"
+    },
+    {
+      "accountId": "acc-owner-1",
+      "userId": "owner-1",
+      "balance": 335,
+      "type": "business",
+      "status": "active",
+      "isPrimary": true,
+      "card": {
+        "number": "7166667414514994",
+        "cvv": "999",
+        "expiry": "2035-11-27",
+        "pin": "5678"
+      },
+      "createdAt": "2025-11-27T10:25:07.441Z"
+    },
+    {
+      "accountId": "acc-customer-2",
+      "userId": "customer-2",
+      "balance": 25000,
+      "type": "savings",
+      "status": "active",
+      "isPrimary": true,
+      "card": {
+        "number": "5555555555554444",
+        "cvv": "456",
+        "expiry": "2032-06-30",
+        "pin": "9999"
+      },
+      "createdAt": "2025-11-28T00:00:00.000Z"
+    }
+  ],
+  "transactions": [
+    {
+      "transactionId": "1764501826478-gqrd5req0",
+      "orderId": "BOOKING-1764501728583",
+      "description": "Payment for Sangavi Spa - 2025-12-01 05:00 pm",
+      "amount": 175,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Sangavi Spa"
+      },
+      "timestamp": "2025-11-30T11:23:46.478Z"
+    },
+    {
+      "transactionId": "1764501882211-g4oilwy32",
+      "orderId": "REFUND-1764501728583",
+      "description": "Refund for booking 1764501728583 - Sangavi Spa",
+      "amount": 175,
+      "type": "refund",
+      "status": "success",
+      "from": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Spa Owner"
+      },
+      "to": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Madhesh Sathya"
+      },
+      "timestamp": "2025-11-30T11:24:42.211Z"
+    },
+    {
+      "transactionId": "1764502466581-lvtyno4bo",
+      "orderId": "BOOKING-1764502427664",
+      "description": "Payment for Kavin Spa - 2025-12-01 02:00 PM",
+      "amount": 35,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Kavin Spa"
+      },
+      "timestamp": "2025-11-30T11:34:26.581Z"
+    },
+    {
+      "transactionId": "1764502505652-v1ck6aump",
+      "orderId": "REFUND-1764502427664",
+      "description": "Refund for booking 1764502427664 - Kavin Spa",
+      "amount": 35,
+      "type": "refund",
+      "status": "success",
+      "from": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Spa Owner"
+      },
+      "to": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Madhesh Sathya"
+      },
+      "timestamp": "2025-11-30T11:35:05.652Z"
+    },
+    {
+      "transactionId": "1764503658716-otfk3bgro",
+      "orderId": "BOOKING-1764503246228",
+      "description": "Payment for Sangavi Spa - 2025-12-01 05:00 pm",
+      "amount": 175,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Sangavi Spa"
+      },
+      "timestamp": "2025-11-30T11:54:18.716Z"
+    },
+    {
+      "transactionId": "1764505348536-ol2j5gj9j",
+      "orderId": "BOOKING-1764505286699",
+      "description": "Payment for Sangavi Spa - 2025-11-30 05:00 pm",
+      "amount": 175,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Sangavi Spa"
+      },
+      "timestamp": "2025-11-30T12:22:28.536Z"
+    },
+    {
+      "transactionId": "1764506012843-yg9d2ntmj",
+      "orderId": "REFUND-1764505286699",
+      "description": "Refund for booking 1764505286699 - Sangavi Spa",
+      "amount": 175,
+      "type": "refund",
+      "status": "success",
+      "from": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Spa Owner"
+      },
+      "to": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Madhesh Sathya"
+      },
+      "timestamp": "2025-11-30T12:33:32.843Z"
+    },
+    {
+      "transactionId": "1764506127618-qzoi41oov",
+      "orderId": "BOOKING-1764506066184",
+      "description": "Payment for Sangavi Spa - 2025-12-01 05:00 pm",
+      "amount": 175,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Sangavi Spa"
+      },
+      "timestamp": "2025-11-30T12:35:27.618Z"
+    },
+    {
+      "transactionId": "1764506293474-ijw214sh1",
+      "orderId": "REFUND-1764506066184",
+      "description": "Refund for booking 1764506066184 - Sangavi Spa",
+      "amount": 175,
+      "type": "refund",
+      "status": "success",
+      "from": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Spa Owner"
+      },
+      "to": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Madhesh Sathya"
+      },
+      "timestamp": "2025-11-30T12:38:13.474Z"
+    },
+    {
+      "transactionId": "1764507508498-cya3g7rhv",
+      "orderId": "BOOKING-1764507481502",
+      "description": "Payment for Kavin Spa - 2025-12-01 02:00 PM",
+      "amount": 50,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Kavin Spa"
+      },
+      "timestamp": "2025-11-30T12:58:28.498Z"
+    },
+    {
+      "transactionId": "1764507554576-dqr4xzwr9",
+      "orderId": "REFUND-1764507481502",
+      "description": "Refund for booking 1764507481502 - Kavin Spa",
+      "amount": 45,
+      "type": "refund",
+      "status": "success",
+      "from": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Spa Owner"
+      },
+      "to": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Delicy"
+      },
+      "timestamp": "2025-11-30T12:59:14.576Z"
+    },
+    {
+      "transactionId": "1764508191144-77vx3fm0g",
+      "orderId": "BOOKING-1764508165417",
+      "description": "Payment for Kavin Spa - 2025-12-01 02:00 PM",
+      "amount": 50,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Kavin Spa"
+      },
+      "timestamp": "2025-11-30T13:09:51.144Z"
+    },
+    {
+      "transactionId": "1764509395855-hi93oeet7",
+      "orderId": "BOOKING-1764509369337",
+      "description": "Payment for Kavin Spa - 2025-12-01 12:00 PM",
+      "amount": 50,
+      "type": "payment",
+      "status": "success",
+      "from": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Kalki"
+      },
+      "to": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Kavin Spa"
+      },
+      "timestamp": "2025-11-30T13:29:55.855Z"
+    },
+    {
+      "transactionId": "1764509530670-s97kkm5mm",
+      "orderId": "REFUND-1764509369337",
+      "description": "Refund for booking 1764509369337 - Kavin Spa",
+      "amount": 45,
+      "type": "refund",
+      "status": "success",
+      "from": {
+        "userId": "owner-1",
+        "upiId": "9791273986@bank",
+        "accountId": "acc-owner-1",
+        "name": "Spa Owner"
+      },
+      "to": {
+        "userId": "customer-1",
+        "upiId": "9000090000@bank",
+        "accountId": "acc-customer-1",
+        "name": "Delicy"
+      },
+      "timestamp": "2025-11-30T13:32:10.670Z"
+    }
+  ]
+}

@@ -21,7 +21,7 @@ const SpaServices = ({ approvedServices }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 50,
+          zIndex: 9999,
           padding: '1rem',
         }}>
           <div style={{

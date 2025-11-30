@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './index1.css';
 
 const API_BASE_URL = 'http://localhost:5000/api/customer';
+const PAYMENT_API_URL = 'http://localhost:5000/api/payment/external';
 
 const PaymentPage = () => {
   const { state } = useLocation();
@@ -13,8 +14,14 @@ const PaymentPage = () => {
   const membershipDetails = state?.membershipDetails || null;
   const storedUser = sessionStorage.getItem('user');
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
   const [membershipStatus, setMembershipStatus] = useState(currentUser?.membership || null);
   const [membershipLoading, setMembershipLoading] = useState(!!(currentUser && !isMembership));
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const [customerUpiId, setCustomerUpiId] = useState('');
+  const [upiPin, setUpiPin] = useState('');
+  const [merchantUpiId] = useState('9791273986@bank'); // fixed merchant UPI
 
   useEffect(() => {
     if (!currentUser || isMembership) {
@@ -48,9 +55,7 @@ const PaymentPage = () => {
     );
   }
 
-  // --- Booking Fields ---
   const bookingId = bookingDetails?.bookingId;
-  const spaId = bookingDetails?.spaId;
   const spaName = bookingDetails?.spaName;
   const services = bookingDetails?.services || [];
   const bookingDate = bookingDetails?.date;
@@ -77,40 +82,60 @@ const PaymentPage = () => {
 
   const membershipName = membershipDetails?.name || membershipDetails?.purpose || 'Spa Membership';
 
-  // --- Payment State ---
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    cardHolder: '',
-    expiryDate: '',
-    cvv: '',
-  });
+  // --- Process UPI Payment ---
+  const processExternalPayment = async (amount, merchantUpi, customerUpi, customerPin, orderId, description) => {
+    try {
+      const response = await fetch(PAYMENT_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amount,
+          merchant: {
+            identifier: merchantUpi,
+            identifierType: "upi_id",
+            name: spaName || "Spa"
+          },
+          paymentMethod: {
+            type: "upi",
+            details: {
+              upiId: customerUpi,
+              pin: customerPin
+            }
+          },
+          orderId: orderId,
+          description: description
+        })
+      });
 
-  const [upiId, setUpiId] = useState('');
-  const [selectedUpiApp, setSelectedUpiApp] = useState('');
+      const result = await response.json();
 
-  const handleCardChange = (e) => {
-    setCardDetails({ ...cardDetails, [e.target.name]: e.target.value });
+      if (!response.ok || result.status !== 'success') {
+        throw new Error(result.message || 'Payment failed');
+      }
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const handleSubmitPayment = async (e) => {
     e.preventDefault();
+    if (isProcessing) return;
 
-    if (paymentMethod === 'card' && cardDetails.cardNumber.length < 16) {
-      alert("Invalid card number");
+    if (!customerUpiId || !upiPin) {
+      alert("Please enter your UPI ID and PIN.");
       return;
     }
 
-    if (paymentMethod === 'upi' && !upiId && !selectedUpiApp) {
-      alert("Please select a UPI app or enter your UPI ID.");
-      return;
-    }
+    setIsProcessing(true);
 
-    // Handle membership payment
+    // --- Membership Payment ---
     if (isMembership) {
       if (!currentUser) {
         alert("Please log in to activate membership.");
         navigate("/login");
+        setIsProcessing(false);
         return;
       }
 
@@ -132,54 +157,67 @@ const PaymentPage = () => {
         const result = await response.json();
         const updatedUser = { ...currentUser, membership: result.membership };
         sessionStorage.setItem("user", JSON.stringify(updatedUser));
-        setMembershipStatus(result.membership);
 
         alert(`🎉 Membership Activated! Valid till ${new Date(result.membership.endDate).toLocaleDateString()}`);
         navigate("/membership");
       } catch (error) {
         console.error("Membership activation error:", error);
         alert(`Unable to activate membership: ${error.message}`);
+      } finally {
+        setIsProcessing(false);
       }
       return;
     }
 
-    // Handle booking payment
+    // --- Booking Payment ---
     try {
-      const paymentDetails =
-        paymentMethod === 'card'
-          ? { cardNumber: cardDetails.cardNumber, cardHolder: cardDetails.cardHolder }
-          : { upiApp: selectedUpiApp, upiId };
+      const orderId = `BOOKING-${bookingId}`;
+      const description = `Payment for ${spaName} - ${bookingDate} ${slot}`;
 
-      console.log("Completing payment for booking ID:", bookingId);
+      const paymentResult = await processExternalPayment(
+        totalPrice,
+        merchantUpiId,
+        customerUpiId,
+        upiPin,
+        orderId,
+        description
+      );
 
-      // Complete the payment using PATCH endpoint
+      const paymentDetails = {
+        upiId: customerUpiId,
+        transactionId: paymentResult.transactionId,
+        merchantName: paymentResult.merchantName,
+        merchantUpiId
+      };
+
       const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/complete`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          paymentMethod,
+          paymentMethod: 'upi',
           paymentDetails,
-          totalPrice: totalPrice,
-          discountPrice: discountRate > 0 ? discountAmount : 0
+          totalPrice,
+          discountPrice: discountRate > 0 ? discountAmount : 0,
+          paymentReference: paymentResult.transactionId,
+          customerUpiId,
+          merchantUpiId
         })
       });
 
-      console.log("Response status:", response.status);
-
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.message || "Failed to complete payment");
+        throw new Error(err.message || "Failed to complete booking");
       }
 
       const result = await response.json();
-      console.log("Payment completed:", result.booking);
-
-      alert(`✅ Payment Successful!\nPayment Reference: ${result.booking.paymentReference}\nAmount Paid: ₹${totalPrice.toFixed(2)}`);
+      alert(`✅ Payment Successful!\nTransaction ID: ${paymentResult.transactionId}\nAmount Paid: ₹${totalPrice.toFixed(2)}`);
       navigate(`/bookings/${currentUser.id}`);
 
     } catch (error) {
       console.error("Payment error:", error);
       alert(`Payment failed: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -187,7 +225,8 @@ const PaymentPage = () => {
     <div className="payment-page">
       <h2>🔒 Secure Payment</h2>
       <div className="payment-container">
-        {/* Summary Box */}
+
+        {/* Summary */}
         <div className="payment-summary">
           <h3>Payment Summary</h3>
           {isMembership ? (
@@ -205,9 +244,7 @@ const PaymentPage = () => {
                 {services.map(s => (typeof s === "object" ? s.name : s)).join(", ")}
               </p>
               <p><strong>Subtotal:</strong> ₹{basePrice.toFixed(2)}</p>
-              {membershipLoading && (
-                <p className="discount-line">Checking membership benefits...</p>
-              )}
+              {membershipLoading && <p className="discount-line">Checking membership benefits...</p>}
               {!membershipLoading && discountRate > 0 && (
                 <p className="discount-line">
                   <strong>Membership Discount (30%):</strong> -₹{discountAmount.toFixed(2)}
@@ -218,108 +255,41 @@ const PaymentPage = () => {
           )}
         </div>
 
-        {/* Payment Methods */}
+        {/* UPI Payment Form */}
         <div className="payment-methods">
-          <h3>Choose Payment Method</h3>
-          <div className="payment-method-tabs">
-            <div
-              className={`payment-tab ${paymentMethod === 'card' ? 'active' : ''}`}
-              onClick={() => setPaymentMethod('card')}
-            >
-              <span className="payment-tab-icon">💳</span>
-              Card
+          <h3>UPI Payment</h3>
+          <form onSubmit={handleSubmitPayment} className="payment-form">
+            <div className="form-group">
+              <label>Your UPI ID (Customer)</label>
+              <input
+                type="text"
+                placeholder="9000090000@bank"
+                value={customerUpiId}
+                onChange={(e) => setCustomerUpiId(e.target.value)}
+                required
+              />
             </div>
-            <div
-              className={`payment-tab ${paymentMethod === 'upi' ? 'active' : ''}`}
-              onClick={() => setPaymentMethod('upi')}
-            >
-              <span className="payment-tab-icon">📱</span>
-              UPI
+            <div className="form-group">
+              <label>Your UPI PIN</label>
+              <input
+                type="password"
+                placeholder="Enter your 4-6 digit PIN"
+                maxLength="6"
+                value={upiPin}
+                onChange={(e) => setUpiPin(e.target.value)}
+                required
+              />
             </div>
-          </div>
+            <button
+              type="submit"
+              className="btn-pay"
+              disabled={isProcessing}
+              style={{ opacity: isProcessing ? 0.6 : 1, cursor: isProcessing ? 'not-allowed' : 'pointer' }}
+            >
+              {isProcessing ? 'Processing...' : `Pay ₹${totalPrice.toFixed(2)}`}
+            </button>
+          </form>
         </div>
-
-        {/* Payment Form */}
-        <form onSubmit={handleSubmitPayment} className="payment-form">
-          {/* CARD PAYMENT */}
-          {paymentMethod === 'card' && (
-            <>
-              <h3>Card Details</h3>
-              <div className="form-group">
-                <label>Card Number</label>
-                <input
-                  type="text"
-                  maxLength="16"
-                  name="cardNumber"
-                  value={cardDetails.cardNumber}
-                  onChange={handleCardChange}
-                  placeholder="1234 5678 9012 3456"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Card Holder</label>
-                <input
-                  type="text"
-                  name="cardHolder"
-                  value={cardDetails.cardHolder}
-                  onChange={handleCardChange}
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Expiry</label>
-                  <input
-                    type="text"
-                    name="expiryDate"
-                    placeholder="MM/YY"
-                    maxLength="5"
-                    value={cardDetails.expiryDate}
-                    onChange={handleCardChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>CVV</label>
-                  <input
-                    type="text"
-                    name="cvv"
-                    maxLength="4"
-                    placeholder="123"
-                    value={cardDetails.cvv}
-                    onChange={handleCardChange}
-                    required
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* UPI PAYMENT */}
-          {paymentMethod === 'upi' && (
-            <div className="upi-payment">
-              <h3>UPI Payment</h3>
-              <div className="form-group">
-                <label>Enter UPI ID</label>
-                <input
-                  type="text"
-                  placeholder="yourname@upi"
-                  value={upiId}
-                  onChange={(e) => {
-                    setUpiId(e.target.value);
-                    setSelectedUpiApp('');
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          <button type="submit" className="btn-pay">
-            Pay ₹{totalPrice.toFixed(2)}
-          </button>
-        </form>
       </div>
     </div>
   );

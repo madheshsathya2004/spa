@@ -224,7 +224,7 @@ router.get('/bookings', (req, res) => {
   let db = readData();
 
   // auto-update booking statuses
-  db = updateBookingStatuses(db);
+
 
   // persist changes to db.json
   writeData(db);

@@ -73,7 +73,7 @@ const SpaOwners = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 50,
+          zIndex: 9999,
           padding: '0.75rem',
         }}>
           <div style={{
